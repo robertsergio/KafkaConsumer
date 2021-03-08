@@ -13,29 +13,37 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import com.google.gson.Gson;
+
 
 @Configuration
 @EnableKafka
 public class KafkaConfig {
 
 	@Bean
-	public ConsumerFactory<String, Message> consumerFactory()
+	public ConsumerFactory<String, String> consumerFactory()
 	{
 		HashMap<String, Object> config = new HashMap<>();
 		config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "127.0.0.1:9092");
 		config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+		config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 		config.put(ConsumerConfig.GROUP_ID_CONFIG, "KafkaGroupId");
 		
-		return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new JsonDeserializer<>(Message.class));
+		return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new StringDeserializer());
 	}
 	
 	@Bean
-	public ConcurrentKafkaListenerContainerFactory<String, Message> kafkaListenerContainerFactory()
+	public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory()
 	{
-		ConcurrentKafkaListenerContainerFactory<String, Message> kafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
+		ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory = new ConcurrentKafkaListenerContainerFactory<>();
 		kafkaListenerContainerFactory.setConsumerFactory(consumerFactory());
 		return kafkaListenerContainerFactory;
+	}
+	
+	@Bean
+	public Gson jsonConverter()
+	{
+		return new Gson();
 	}
 	
 }
